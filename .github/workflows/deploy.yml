@@ -30,6 +30,8 @@ jobs:
           node-version: 22
       - name: Install dependencies
         run: npm install --legacy-peer-deps
+      - name: Install react-is
+        run: npm install react-is --no-save --legacy-peer-deps
       - name: Build
         run: npm run build
         env:
