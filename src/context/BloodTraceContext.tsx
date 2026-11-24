@@ -29,11 +29,19 @@ export type NavigationPage =
   | 'reports' 
   | 'settings';
 
+interface LoginPayload {
+  email: string;
+  password: string;
+  role: UserRole;
+  remember?: boolean;
+}
+
 interface BloodTraceContextType {
   units: BloodUnit[];
   handovers: HandoverTransfer[];
   notifications: AlertNotification[];
   currentUser: UserProfile;
+  isAuthenticated: boolean;
   activeTab: NavigationPage;
   searchQuery: string;
   thresholds: ColdChainThresholds;
@@ -43,6 +51,8 @@ interface BloodTraceContextType {
   setSearchQuery: (query: string) => void;
   setSelectedUnitIdForTracking: (unitId: string) => void;
   setCurrentRole: (role: UserRole) => void;
+  login: (payload: LoginPayload) => { success: boolean; error?: string };
+  logout: () => void;
   addBloodUnit: (newUnit: Omit<BloodUnit, 'id' | 'temperatureHistory' | 'custodyHistory' | 'trackingSteps'>) => BloodUnit;
   updateUnitStatus: (unitId: string, status: UnitStatus, reason?: string) => void;
   acknowledgeAlert: (alertId: string) => void;
@@ -62,6 +72,7 @@ const LOCAL_STORAGE_KEY_UNITS = 'bloodtrace_units_v1';
 const LOCAL_STORAGE_KEY_HANDOVERS = 'bloodtrace_handovers_v1';
 const LOCAL_STORAGE_KEY_ALERTS = 'bloodtrace_alerts_v1';
 const LOCAL_STORAGE_KEY_ROLE = 'bloodtrace_user_role_v1';
+const LOCAL_STORAGE_KEY_AUTH = 'bloodtrace_auth_session_v1';
 
 export const BloodTraceProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [activeTab, setActiveTab] = useState<NavigationPage>('dashboard');
@@ -69,6 +80,32 @@ export const BloodTraceProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [selectedUnitIdForTracking, setSelectedUnitIdForTracking] = useState<string>('BT-2026-001');
   const [liveSimulationActive, setLiveSimulationActive] = useState<boolean>(true);
   const [thresholds, setThresholds] = useState<ColdChainThresholds>(INITIAL_THRESHOLDS);
+
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    try {
+      const saved = localStorage.getItem(LOCAL_STORAGE_KEY_AUTH);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return Boolean(parsed?.isAuthenticated);
+      }
+    } catch {
+      // Fallback
+    }
+    return false;
+  });
+
+  const [loggedInEmail, setLoggedInEmail] = useState<string | null>(() => {
+    try {
+      const saved = localStorage.getItem(LOCAL_STORAGE_KEY_AUTH);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return parsed?.email || null;
+      }
+    } catch {
+      // Fallback
+    }
+    return null;
+  });
 
   const [currentRole, setCurrentRoleState] = useState<UserRole>(() => {
     const saved = localStorage.getItem(LOCAL_STORAGE_KEY_ROLE);
@@ -78,11 +115,18 @@ export const BloodTraceProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     return 'Administrator';
   });
 
-  const currentUser = currentRole === 'Administrator' 
+  const baseUser = currentRole === 'Administrator' 
     ? MOCK_USERS.admin 
     : currentRole === 'Blood Bank Staff' 
     ? MOCK_USERS.staff 
     : MOCK_USERS.courier;
+
+  const currentUser: UserProfile = loggedInEmail && loggedInEmail.toLowerCase() !== baseUser.email.toLowerCase()
+    ? {
+        ...baseUser,
+        email: loggedInEmail,
+      }
+    : baseUser;
 
   // Initialize Units from localStorage or defaults
   const [units, setUnits] = useState<BloodUnit[]>(() => {
@@ -136,6 +180,40 @@ export const BloodTraceProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
   const setCurrentRole = (role: UserRole) => {
     setCurrentRoleState(role);
+    setLoggedInEmail(null);
+  };
+
+  const login = ({ email, password, role, remember = true }: LoginPayload): { success: boolean; error?: string } => {
+    const normalizedEmail = email.trim().toLowerCase();
+    if (!normalizedEmail || !normalizedEmail.includes('@')) {
+      return { success: false, error: 'Please enter a valid email address.' };
+    }
+    if (!password || password.trim().length < 4) {
+      return { success: false, error: 'Password must be at least 4 characters.' };
+    }
+
+    setCurrentRoleState(role);
+    setLoggedInEmail(normalizedEmail);
+    setIsAuthenticated(true);
+    setActiveTab('dashboard');
+
+    if (remember) {
+      localStorage.setItem(
+        LOCAL_STORAGE_KEY_AUTH,
+        JSON.stringify({ isAuthenticated: true, email: normalizedEmail, role })
+      );
+    } else {
+      localStorage.removeItem(LOCAL_STORAGE_KEY_AUTH);
+    }
+
+    return { success: true };
+  };
+
+  const logout = () => {
+    setIsAuthenticated(false);
+    setLoggedInEmail(null);
+    setActiveTab('dashboard');
+    localStorage.removeItem(LOCAL_STORAGE_KEY_AUTH);
   };
 
   const toggleLiveSimulation = () => {
@@ -640,7 +718,7 @@ export const BloodTraceProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `BloodTrace_Inventory_Report_${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute('download', `Blood_Traceability_and_Availability_Report_${new Date().toISOString().split('T')[0]}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -653,6 +731,7 @@ export const BloodTraceProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         handovers,
         notifications,
         currentUser,
+        isAuthenticated,
         activeTab,
         searchQuery,
         thresholds,
@@ -662,6 +741,8 @@ export const BloodTraceProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         setSearchQuery,
         setSelectedUnitIdForTracking,
         setCurrentRole,
+        login,
+        logout,
         addBloodUnit,
         updateUnitStatus,
         acknowledgeAlert,

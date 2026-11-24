@@ -152,7 +152,7 @@ export const ReportsPage: React.FC = () => {
           <div className="mb-4">
             <h3 className="text-sm font-bold text-slate-900">Blood Product Wastage Reduction Trend</h3>
             <p className="text-xs text-slate-500">
-              Monthly expired units before vs after implementing BloodTrace FEFO tracking
+              Monthly expired units before vs after implementing Blood Traceability and Availability FEFO tracking
             </p>
           </div>
 
@@ -172,8 +172,8 @@ export const ReportsPage: React.FC = () => {
                   }}
                 />
                 <Legend wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }} />
-                <Bar dataKey="beforeFEFO" name="Pre-BloodTrace (FIFO/Manual)" fill="#94a3b8" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="withBloodTrace" name="With BloodTrace (FEFO + Telemetry)" fill="#b91c1c" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="beforeFEFO" name="Before System (FIFO/Manual)" fill="#94a3b8" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="withBloodTrace" name="With FEFO + Telemetry" fill="#b91c1c" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>

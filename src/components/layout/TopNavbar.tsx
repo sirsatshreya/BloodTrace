@@ -12,7 +12,8 @@ import {
   FlaskConical, 
   Check, 
   AlertTriangle,
-  ArrowRight
+  ArrowRight,
+  LogOut
 } from 'lucide-react';
 import { useBloodTrace, NavigationPage } from '../../context/BloodTraceContext';
 import { UserRole } from '../../types/bloodTrace';
@@ -50,7 +51,8 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
     searchQuery, 
     setSearchQuery, 
     setSelectedUnitIdForTracking,
-    acknowledgeAlert
+    acknowledgeAlert,
+    logout
   } = useBloodTrace();
 
   const [roleMenuOpen, setRoleMenuOpen] = useState(false);
@@ -101,7 +103,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
     setRoleMenuOpen(false);
   };
 
-  const pageInfo = PAGE_TITLES[activeTab] || { title: 'BloodTrace', subtitle: 'Unit-Level Traceability' };
+  const pageInfo = PAGE_TITLES[activeTab] || { title: 'Blood Traceability and Availability', subtitle: 'Unit-Level Traceability' };
 
   return (
     <header className="sticky top-0 z-30 bg-white border-b border-slate-200">
@@ -276,10 +278,10 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
 
             {roleMenuOpen && (
               <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-xl shadow-xl border border-slate-200 py-2 z-50">
-                <div className="px-4 py-2 border-b border-slate-100">
+                <div className="px-4 py-2.5 border-b border-slate-100">
                   <p className="text-xs font-bold text-slate-900">{currentUser.name}</p>
                   <p className="text-[11px] text-slate-500">{currentUser.title}</p>
-                  <p className="text-[10px] text-slate-400 mt-0.5">{currentUser.facility}</p>
+                  <p className="text-[10px] font-mono text-slate-400 mt-0.5 truncate">{currentUser.email}</p>
                 </div>
 
                 <div className="p-2">
@@ -308,8 +310,17 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                   })}
                 </div>
 
-                <div className="pt-2 px-3 border-t border-slate-100 text-[10px] text-slate-400">
-                  Switching roles adapts available custody and disposition permissions.
+                <div className="pt-2 px-2 border-t border-slate-100">
+                  <button
+                    onClick={() => {
+                      setRoleMenuOpen(false);
+                      logout();
+                    }}
+                    className="w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-xs font-semibold text-red-700 hover:bg-red-50 transition-colors"
+                  >
+                    <LogOut className="w-3.5 h-3.5" />
+                    <span>Sign Out to Login Page</span>
+                  </button>
                 </div>
               </div>
             )}

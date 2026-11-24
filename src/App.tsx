@@ -15,12 +15,14 @@ import { ExpiryPage } from './pages/ExpiryPage';
 import { AlertsPage } from './pages/AlertsPage';
 import { ReportsPage } from './pages/ReportsPage';
 import { SettingsPage } from './pages/SettingsPage';
+import { LoginPage } from './pages/LoginPage';
 import { BloodUnit } from './types/bloodTrace';
 
 function MainAppLayout() {
   const { 
     activeTab, 
     units, 
+    isAuthenticated,
     setSelectedUnitIdForTracking, 
     setActiveTab 
   } = useBloodTrace();
@@ -50,6 +52,10 @@ function MainAppLayout() {
     setSelectedUnitIdForTracking(unitId);
     setActiveTab('tracking');
   };
+
+  if (!isAuthenticated) {
+    return <LoginPage />;
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans flex antialiased">

@@ -92,7 +92,7 @@ export const ExpiryPage: React.FC<{
               </h2>
             </div>
             <p className="text-xs text-slate-600 max-w-3xl leading-relaxed">
-              FEFO dynamically ranks blood products by chronological shelf-life expiration. By dispensing units closest to expiry first, BloodTrace drastically reduces wastage and prevents discards, while strictly walling off expired and thermally compromised units.
+              FEFO dynamically ranks blood products by chronological shelf-life expiration. By dispensing units closest to expiry first, Blood Traceability and Availability drastically reduces wastage and prevents discards, while strictly walling off expired and thermally compromised units.
             </p>
           </div>
 

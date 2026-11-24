@@ -40,7 +40,7 @@ export const QRCodeModal: React.FC<QRCodeModalProps> = ({ unit, onClose }) => {
             {/* Top Label Header */}
             <div className="flex items-start justify-between border-b-2 border-slate-900 pb-3">
               <div>
-                <p className="text-[10px] tracking-wider uppercase font-semibold text-slate-500">Blood Traceability System</p>
+                <p className="text-[10px] tracking-wider uppercase font-semibold text-slate-500">Blood Traceability and Availability</p>
                 <p className="text-xl font-mono font-bold tracking-tight text-slate-900">{unit.id}</p>
                 <p className="text-xs text-slate-600">Central Metropolitan Blood Bank</p>
               </div>
@@ -92,7 +92,7 @@ export const QRCodeModal: React.FC<QRCodeModalProps> = ({ unit, onClose }) => {
                     <rect x="75" y="85" width="20" height="10" fill="currentColor" />
                   </svg>
                 </div>
-                <span className="text-[10px] font-mono text-slate-500 mt-1">SCAN VIA BLOODTRACE</span>
+                <span className="text-[10px] font-mono text-slate-500 mt-1">SCAN TO VERIFY UNIT</span>
               </div>
 
               {/* Component Info */}
